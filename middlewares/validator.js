@@ -41,4 +41,34 @@ const accesptCodeSchema = joi.object({
   providedCode: joi.number().required(),
 });
 
-module.exports = { signinSchema, signupSchema, accesptCodeSchema };
+const changePasswordSchema = joi.object({
+  oldPassword: joi
+    .string()
+    .required()
+    .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*d).{8,}$")),
+  newPassword: joi
+    .string()
+    .required()
+    .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*d).{8,}$")),
+});
+
+const acceptFPCodeSchema = joi.object({
+  email: joi
+    .string()
+    .min(6)
+    .max(60)
+    .required()
+    .email({ tlds: { allow: ["com", "net"] } }),
+  newPassword: joi
+    .string()
+    .required()
+    .pattern(new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*d).{8,}$")),
+});
+
+module.exports = {
+  signinSchema,
+  signupSchema,
+  accesptCodeSchema,
+  changePasswordSchema,
+  acceptFPCodeSchema,
+};

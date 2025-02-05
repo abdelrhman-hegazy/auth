@@ -5,7 +5,7 @@ const cors = require("cors"); // Cros-Orign Resource sharing
 const cookieParser = require("cookie-parser");
 const compression = require("compression");
 const session = require("express-session");
-const passport = require("passport")
+const passport = require("passport");
 const MongoStore = require("connect-mongo");
 
 require("./config/passport");
@@ -41,12 +41,14 @@ app.use(passport.session());
 
 app.use("/api/v1/auth", authRouter);
 app.get("/profile", (req, res) => {
-  res.send('welcome in chefio');
+  res.send("welcome in chefio");
 });
 app.get("/", (req, res) => {
-  res.send('<a href="http://localhost:3000/api/v1/auth/google">Authenticate with Google</a>');
+  res.send(
+    '<a href="http://localhost:3000/api/v1/auth/google">Authenticate with Google</a>'
+  );
 });
-const port = process.env.port || 3000;
+const port = process.env.PORT || 3000;
 const start = async () => {
   try {
     await connectDB(process.env.MONGO_URI);
