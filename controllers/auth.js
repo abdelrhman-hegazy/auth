@@ -1,4 +1,7 @@
+// const jwt = require("jsonwebtoken");
+const passport = require("passport");
 const jwt = require("jsonwebtoken");
+const { generateToken } = require("../utils/jwt");
 
 const {
   signinSchema,
@@ -8,6 +11,7 @@ const {
 const User = require("../models/user");
 const { doHash, doHashValidation, hmacProcess } = require("../utils/hashing");
 const transport = require("../middlewares/sendMail");
+const generteToken = require("../utils/jwt");
 
 //signup
 const signup = async (req, res) => {
@@ -79,21 +83,21 @@ const signin = async (req, res) => {
         .json({ success: false, message: "Invalid credentials!" });
     }
 
-    const token = jwt.sign(
-      {
-        userId: existingUser._id,
-        email: existingUser.email,
-        verified: existingUser.verified,
-      },
-      process.env.TOKEN_SECRET,
-      {
-        expiresIn: "8h",
-      }
-    );
-
+    // const token = jwt.sign(
+    //   {
+    //     userId: existingUser._id,
+    //     email: existingUser.email,
+    //     verified: existingUser.verified,
+    //   },
+    //   process.env.TOKEN_SECRET,
+    //   {
+    //     expiresIn: "8h",
+    //   }
+    // );
+    const token = generteToken(existingUser);
     res
       .cookie("Authorization", "Bearer " + token, {
-        expires: new Date(Date.now() + 8 * 3600000),
+        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
         httpOnly: process.env.NODE_ENV === "production",
         secure: process.env.NODE_ENV === "production",
       })
@@ -220,10 +224,37 @@ const verifyVerificationCode = async (req, res) => {
   }
 };
 
+// google oauth
+
+const googleAuthCallback = (req, res) => {
+  let user = req.user
+  if (!user) {
+    return res.status(401).json({ message: "Authentication failed" });
+  }
+
+  const token = jwt.sign(
+    {
+      userId: user._id,
+      email: user.email,
+      verified: user.verified,
+    },
+    process.env.TOKEN_SECRET,
+    { expiresIn: "7d" }
+  );
+
+  res
+    .cookie("Authorization", "Bearer " + token, {
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      httpOnly: process.env.NODE_ENV === "production",
+      secure: process.env.NODE_ENV === "production",
+    })
+    .redirect("http://localhost:3000/profile");
+};
 module.exports = {
   signup,
   signin,
   signout,
   sendverificationCode,
   verifyVerificationCode,
+  googleAuthCallback,
 };

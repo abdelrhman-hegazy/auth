@@ -1,4 +1,3 @@
-
 const mongoose = require("mongoose");
 
 const userSchema = mongoose.Schema(
@@ -13,20 +12,33 @@ const userSchema = mongoose.Schema(
       type: String,
       required: [true, "email required"],
       trim: true,
-      unique: [true, "email must be unique"],
+      unique: true,
       minLength: [5, "email must have 5 characters!"],
       lowercase: true,
     },
     password: {
       type: String,
-      required: [true, "password required"],
       trim: true,
       select: false,
       minlength: [6, "Too short password"],
+      required: function () {
+        return !this.googleId; // Require password only if googleId is not set
+      },
+    },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true, // Allows multiple null values
+    },
+    avatar: {
+      type: String,
     },
     verified: {
       type: Boolean,
-      default: false,
+      default: false
+      // function () {
+      //   return !!this.googleId; // Require password only if googleId is not set
+      // },
     },
     verificationCode: {
       type: String,
